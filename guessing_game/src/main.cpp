@@ -63,7 +63,7 @@ int main() {
     bool isPlaying = true;
     int difficulty = 1;
     while (isPlaying){
-        int randomNumber = rand() % (10 * difficulty * 2) - (10 * difficulty);
+        int randomNumber = rand() % (10 * difficulty * 2);
 
         std::cout << "Try an guess my number :)" << std::endl;
 
@@ -111,27 +111,28 @@ int main() {
         }
 
         while (true){
-            std::cout << "Would you like to play again:";
+            std::cout << "Would you like to play again(y/n):";
             std::string choice;
             std::cin >> choice;
             bool badChoice = false;
             badChoice |= choice.length() != 1;
             if (badChoice){
-                std::cout << "Sorry what ?";
+                std::cout << "Sorry what ?" << std::endl;
             }
 
             if ( std::tolower(choice[0]) == 'n' ){
-                std::cout << "Alright see you next time >:)";
+                std::cout << "Difficulty reached lvl " << difficulty << std::endl;
+                std::cout << "Alright see you next time >:)" << std::endl;
                 isPlaying = false;
                 break;
             }
             else if ( std::tolower(choice[0]) == 'y' ){
-                std::cout << "Yay GoodLuck. I am making it harder now >:)";
+                clearScreen();
+                std::cout << "Yay GoodLuck. I am making it harder now >:)" << std::endl;
                 difficulty++;
                 break;
             }
         }
-        clearScreen();
     }
     // std::cout << "Hi Dad!" << std::endl;
 }
