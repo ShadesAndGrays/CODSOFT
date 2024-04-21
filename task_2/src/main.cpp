@@ -1,9 +1,15 @@
 #include <exception>
+
 #include <functional>
 #include <iostream>
 #include <sstream>
+#include <string>
 #include <vector>
 // I am going to use a stack data structure to make it fancy
+
+void clearScreen() {
+    std::cout << "\033[2J\033[1;1H";
+}
 
 class StackUnderFlow : public std::exception{
     virtual const char * what() const throw(){
@@ -108,22 +114,27 @@ class Calculator{
             };
             switch (op) {
                 case ADD:
+                    std::cout << "Stack: " << stack.toString() << " Op: " << "ADD" << std::endl;
                     value = 0;
                     operate(add);
                     break;
                 case SUBTRACT:
+                    std::cout << "Stack: " << stack.toString() << " Op: " << "SUB" << std::endl;
                     value = reverseStack.pop();
                     operate(sub);
                     break;
                 case MULTIPLY:
+                    std::cout << "Stack: " << stack.toString() << " Op: " << "MUL" << std::endl;
                     value = 1;
                     operate(mul);
                     break;
                 case DIVIDE:
+                    std::cout << "Stack: " << stack.toString() << " Op: " << "DIV" << std::endl;
                     value = reverseStack.pop();
                     operate(div);
                     break;
                 case NEGATE:
+                    std::cout << "Stack: " << stack.toString() << " Op: " << "NEG" << std::endl;
                     value = -1;
                     transform(neg);
                     break;
@@ -138,6 +149,9 @@ class Calculator{
             while(stack.size() > 0){
                 stack.pop();
             }
+        }
+        void view(){
+            stack.displayStack();
         }
         void store(MEM mem){
             if (this->stack.size() == 1){
@@ -183,12 +197,31 @@ class Calculator{
 
 };
 
+std::string input(std::string prompt){
+    std::cout << prompt;
+    std::string in;
+    std::cin >> in;
+    return in;
+}
+
+
 
 int main() {
     Calculator calc;
+    bool calculating = true;
+    std::cout << "Welcome to Stackulator" << std::endl;
+    input("Enter any key to continue: ");
+
+
+    while (calculating){
+        input("input a number");
+
+    }
     for (auto i = 0; i < 20; i ++)
         calc.addNumber(i);
     calc.squash(Calculator::NEGATE);
+    calc.clear();
+
 
 
 
