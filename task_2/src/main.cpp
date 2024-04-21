@@ -1,6 +1,6 @@
 #include <exception>
 #include <iostream>
-
+#include <sstream>
 #include <vector>
 // I am going to use a stack data structure to make it fancy
 
@@ -28,6 +28,19 @@ class Stack{
             }
             std::cout << "]"  << std::endl;
         }
+        std::string toString(){
+            std::stringstream stream;
+            stream << "[";
+            for (auto i = 0; i < array.size() ; i++){
+                stream << array[i];
+                if (i != array.size() - 1)
+                    stream << ", ";
+            }
+            stream << "]"  << std::endl;
+            return stream.str();
+        }
+
+        
         void push(double number){
             array.push_back(number);
         }
@@ -64,12 +77,8 @@ int main() {
     stack.push(22.4);
     stack.displayStack();
     stack.push(1.2);
-    std::cout << "Value at the top of the stack is "<< stack.peek() << std::endl;
     stack.push(53.5);
     stack.displayStack();
-    std::cout << "Value at the top of the stack is "<< stack.pop() << std::endl;
-    std::cout << "Value at the top of the stack is "<< stack.pop() << std::endl;
-    std::cout << "Value at the top of the stack is "<< stack.pop() << std::endl;
-    stack.displayStack();
+
 
 }
