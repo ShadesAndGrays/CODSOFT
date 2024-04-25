@@ -145,10 +145,16 @@ class Calculator{
             stack.push(num);
             stack.displayStack();
         }
+        void removeLast(){
+            stack.pop();
+            stack.displayStack();
+        }
         void clear(){
             while(stack.size() > 0){
                 stack.pop();
             }
+            this->mem1 = this->mem2 = this->mem3 = 0;
+            view();
         }
         void view(){
             stack.displayStack();
@@ -159,12 +165,11 @@ class Calculator{
                     case MEM1:
                         this->mem1 = this->stack.peek();
                         break;
-                    case MEM2:
-                        this->mem2 = this->stack.peek();
-                        break;
+                    case MEM2: this->mem2 = this->stack.peek();
+                               break;
                     case MEM3:
-                        this->mem3 = this->stack.peek();
-                        break;
+                               this->mem3 = this->stack.peek();
+                               break;
                 }
 
             }
@@ -178,6 +183,21 @@ class Calculator{
             stack.displayStack();
         }
 
+        double getMem(MEM mem){
+            switch (mem) {
+                case MEM1:
+                    return mem1;
+                    break;
+                case MEM2:
+                    return mem2;
+                    break;
+                case MEM3:
+                    return mem3;
+                    break;
+            }
+            return 0.0;
+
+        }
         void retrieve(MEM mem){
             switch (mem) {
                 case MEM1:
@@ -200,17 +220,21 @@ class Calculator{
 std::string input(std::string prompt){
     std::cout << prompt;
     std::string in;
-    std::cin >> in;
+    std::getline(std::cin, in);
     return in;
 }
 
 
 void inputCycle (Calculator& calc){
-    std::cout << "'e' to exit:" << std::endl;
+    std::cout << "'e' to exit   'u' to undo" << std::endl;
     std::string in = "";
     while(in != "e"){
-        in = input(":");
+        in = input("AddNumber::");
         try {
+            if (in == "u"){
+                calc.removeLast();
+                continue;
+            }
             calc.addNumber(std::stod(in));
         } catch (std::exception e) {
             if (in != "e")
@@ -230,7 +254,7 @@ void processSquash(Calculator &calc){
     option << "5. negate\t";
     std::cout << option.str()  << std::endl;
     while (true){
-        std::string choice = input("insert: ");
+        std::string choice = input("Sqush:: ");
         int choiceInt = 0;
         int x = 0;
         try {
@@ -258,6 +282,82 @@ void processSquash(Calculator &calc){
                 return;
             default:
                 std::cout << "enter a valid option" << std::endl;
+                std::cout << option.str() << std::endl;
+                break;
+        }
+    }
+}
+
+void alterMem(Calculator &calc){
+    std::stringstream option;
+    option << "0. Exit\n";
+    option << "1. View Mem Cell\t";
+    option << "2. Push Cell To Stack\t";
+    option << "3. Set Mem Cell\t";
+
+    std::cout << option.str() << std::endl;
+    auto displayCells = [&](){
+        std::cout <<"Mem1: "<< calc.getMem(Calculator::MEM::MEM1) << " ";
+        std::cout <<"Mem2: "<< calc.getMem(Calculator::MEM::MEM2) << " ";
+        std::cout <<"Mem3: "<< calc.getMem(Calculator::MEM::MEM3) << " ";
+        std::cout << std::endl;
+    };
+    auto numToMem = [](int num){
+        switch (num) {
+            case 1:
+                return Calculator::MEM1;
+                break;
+            case 2:
+                return Calculator::MEM2;
+                break;
+            case 3:
+                return Calculator::MEM3;
+                break;
+            default:
+                return Calculator::MEM1;
+                break;
+        }
+    };
+
+    while (true){
+        std::string choice = input("Mem:: ");
+        int choiceInt = 0;
+        try {
+            choiceInt = std::stoi(choice);
+        }catch(std::exception e){
+            choiceInt = -1;
+        }
+
+        switch (choiceInt) {
+            case 0:
+                // exiting
+                return;
+            case 1:
+                displayCells();
+                break;
+
+            case 2:
+                try {
+                    int memCellNumber = std::stoi(input("Enter CellNumber: ")); 
+                    calc.retrieve(numToMem(memCellNumber));
+                }catch(std::exception e){
+                    std::cout<< "Invalid Cell!" << std::endl;
+                }
+                displayCells();
+                break;
+            case 3:
+                displayCells();
+                try {
+
+                    int memCellNumber = std::stoi(input("Enter CellNumber: ")); 
+                    calc.store(numToMem(memCellNumber));
+                }catch(std::exception e){
+                    std::cout<< "Invalid Cell!" << std::endl;
+                }
+                break;
+            default:
+                std::cout << "Invalid Option!" << std::endl;
+                std::cout << option.str() << std::endl;
                 break;
         }
     }
@@ -268,13 +368,16 @@ void processSquash(Calculator &calc){
 int main() {
     Calculator calc;
     bool calculating = true;
+    clearScreen();
     std::cout << "Welcome to Stackulator" << std::endl;
-    input("Enter any key to continue: ");
+    input("Enter any key to continue:: ");
     clearScreen();
 
     calc.clear();
     std::stringstream option;
-    option << "0. help\n";
+    option << "h. help\n";
+    option << "c. clear screen\n";
+    option << "0. exit\n";
     option << "1. view stack\n";
     option << "2. squash (+ | - | * | /)\n";
     option << "3. add number\n";
@@ -285,17 +388,26 @@ int main() {
     int optionChoiceInt; // Integer makes it easier to parse
     std::cout  << option.str() << std::endl;
     while (calculating){
-        optionChoice = input("Pick an option: ");
+        optionChoice = input("Menu:: ");
+        if (optionChoice == "h"){
+            std::cout << option.str() << std::endl;
+            continue;
+        }
+        else if (optionChoice == "c") {
+            clearScreen();
+            continue;
+        }
         try {
             optionChoiceInt = std::stoi(optionChoice);
         } catch (std::exception e) {
-            std::cerr << "Please input a valid option" << std::endl;
+            std::cerr << "Invalid Option!!! "<< std::endl;
+            std::cout << option.str() << std::endl;
             continue;
         }
 
         switch (optionChoiceInt) {
             case 0:
-                std::cout << option.str() << std::endl;
+                calculating = false;
                 break;
             case 1:
                 calc.view();
@@ -306,25 +418,21 @@ int main() {
             case 3:
                 inputCycle(calc);
                 break;
+            case 4:
+                alterMem(calc);
+                break;
             case 5:
                 calc.clear();
                 break;
             default:
-                std::cout << "Option choosen " << optionChoiceInt << std::endl;
+                std::cerr << "Invalid Option!!! " << optionChoiceInt << std::endl;
+                std::cout << option.str() << std::endl;
                 continue;
         }
-
-
-
-        // 0. help
-        // 1. view stack
-        // 2. squash stack/ perform operation
-        //// 1. add 2. sub 3. div 4. mul
-        // 3. add number
-        // 4. acess memory cells
-        //// 1. push to stack 2. set mem cell
-        // 5. clear stack
-
     }
     calc.clear();
+    clearScreen();
+    std::cout << "Thank you for using Stackulator" << std::endl;
+
+
 }
