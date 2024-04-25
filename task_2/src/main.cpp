@@ -44,7 +44,7 @@ class Stack{
                 if (i != array.size() - 1)
                     stream << ", ";
             }
-            stream << "]"  << std::endl;
+            stream << "]";
             return stream.str();
         }
 
@@ -175,22 +175,22 @@ class Calculator{
             else{
                 std::cout << "You must squash before storing" << std::endl;
             }
-        stack.displayStack();
+            stack.displayStack();
         }
 
         void retrieve(MEM mem){
-                switch (mem) {
-                    case MEM1:
-                        this->stack.push(mem1);
-                        break;
-                    case MEM2:
-                        this->stack.push(mem2);
-                        break;
-                    case MEM3:
-                        this->stack.push(mem3);
-                        break;
-                }
-           stack.displayStack(); 
+            switch (mem) {
+                case MEM1:
+                    this->stack.push(mem1);
+                    break;
+                case MEM2:
+                    this->stack.push(mem2);
+                    break;
+                case MEM3:
+                    this->stack.push(mem3);
+                    break;
+            }
+            stack.displayStack(); 
 
         }
 
@@ -205,25 +205,126 @@ std::string input(std::string prompt){
 }
 
 
+void inputCycle (Calculator& calc){
+    std::cout << "'e' to exit:" << std::endl;
+    std::string in = "";
+    while(in != "e"){
+        in = input(":");
+        try {
+            calc.addNumber(std::stod(in));
+        } catch (std::exception e) {
+            if (in != "e")
+                std::cout << "enter a valid number" << std::endl;
+            continue;
+        }
+    }
+}
+
+void processSquash(Calculator &calc){
+    std::stringstream option;
+    option << "0. exit\n";
+    option << "1. addition\t";
+    option << "2. subtract\t";
+    option << "3. multiply\t";
+    option << "4. divide\t";
+    option << "5. negate\t";
+    std::cout << option.str()  << std::endl;
+    while (true){
+        std::string choice = input("insert: ");
+        int choiceInt = 0;
+        int x = 0;
+        try {
+            x = std::stoi(choice);
+        }catch(std::exception e){
+            std::cout << "enter a valid option" << std::endl;
+        }
+        switch (x) {
+            case 0:
+                return;
+            case 1:
+                calc.squash(Calculator::ADD);
+                return;
+            case 2:
+                calc.squash(Calculator::SUBTRACT);
+                return;
+            case 3:
+                calc.squash(Calculator::MULTIPLY);
+                return;
+            case 4:
+                calc.squash(Calculator::DIVIDE);
+                return;
+            case 5:
+                calc.squash(Calculator::NEGATE);
+                return;
+            default:
+                std::cout << "enter a valid option" << std::endl;
+                break;
+        }
+    }
+}
+
+
 
 int main() {
     Calculator calc;
     bool calculating = true;
     std::cout << "Welcome to Stackulator" << std::endl;
     input("Enter any key to continue: ");
+    clearScreen();
 
+    calc.clear();
+    std::stringstream option;
+    option << "0. help\n";
+    option << "1. view stack\n";
+    option << "2. squash (+ | - | * | /)\n";
+    option << "3. add number\n";
+    option << "4. memory cell\n";
+    option << "5. clear stack\n";
 
+    std::string optionChoice; 
+    int optionChoiceInt; // Integer makes it easier to parse
+    std::cout  << option.str() << std::endl;
     while (calculating){
-        input("input a number");
+        optionChoice = input("Pick an option: ");
+        try {
+            optionChoiceInt = std::stoi(optionChoice);
+        } catch (std::exception e) {
+            std::cerr << "Please input a valid option" << std::endl;
+            continue;
+        }
+
+        switch (optionChoiceInt) {
+            case 0:
+                std::cout << option.str() << std::endl;
+                break;
+            case 1:
+                calc.view();
+                break;
+            case 2:
+                processSquash(calc);
+                break;
+            case 3:
+                inputCycle(calc);
+                break;
+            case 5:
+                calc.clear();
+                break;
+            default:
+                std::cout << "Option choosen " << optionChoiceInt << std::endl;
+                continue;
+        }
+
+
+
+        // 0. help
+        // 1. view stack
+        // 2. squash stack/ perform operation
+        //// 1. add 2. sub 3. div 4. mul
+        // 3. add number
+        // 4. acess memory cells
+        //// 1. push to stack 2. set mem cell
+        // 5. clear stack
 
     }
-    for (auto i = 0; i < 20; i ++)
-        calc.addNumber(i);
-    calc.squash(Calculator::NEGATE);
     calc.clear();
-
-
-
-
-
 }
