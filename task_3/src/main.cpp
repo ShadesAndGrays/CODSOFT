@@ -1,5 +1,4 @@
 #include <exception>
-#include <functional>
 #include <thread>
 #include <iostream>
 #include <string>
@@ -67,42 +66,95 @@ void displayBoard(GameState& state){
     std::cout << std::endl;
 }
 
-bool gameEnded(GameState &state){
-    
-    bool xWon = true;
-    bool oWon = true;
+void checkEnd(GameState &state){
+    // Handling end game logic
 /*  
     0 1 2
     3 4 5
     6 7 8
  *  */
 
-    // const std::vector<std::vector<int>> wins{{0,3,6},{1,4,7},{2,5,8},{0,1,2},3,4,8};
+    //  All possible win strategies 
+    // const std::vector<std::vector<int>> wins{{0,3,6},{1,4,7},{2,5,8},{0,1,2},{3,4,8},{6,7,8}, {0,4,8},{2,5,8}};
+
     std::vector<int> vWins {0,1,2};
     std::vector<int> hWins {0,3,6};
+    std::vector<int> dWins{2,0};
 
+    // Checking for all wins from top to button in O(n)
     for (auto i : vWins){
-        xWon &= state.board[i] == X;
-        xWon &= state.board[i+3] == X;
-        xWon &= state.board[i+6] == X;
+        bool xWon = true;
+        bool oWon = true;
+        // std::cout << i << " " << i + 3 << " " << i + 6 << std::endl;
+        xWon &= state.board[i] == ELEMENT::X;
+        xWon &= state.board[i+3] == ELEMENT::X;
+        xWon &= state.board[i+6] == ELEMENT::X;
         if (xWon)
         {
             state.winner = ELEMENT::X;
             state.gameOver = true;
+            break;
         }
-        oWon &= state.board[i] == O;
-        oWon &= state.board[i+3] == O;
-        oWon &= state.board[i+6] == O;
+        oWon &= state.board[i] == ELEMENT::O;
+        oWon &= state.board[i+3] == ELEMENT::O;
+        oWon &= state.board[i+6] == ELEMENT::O;
         if (oWon)
         {
             state.winner = ELEMENT::O;
             state.gameOver = true;
+            break;
         }
     }
+    // Checking for all wins from top to button in O(n)
+    for (auto i : hWins){
+        bool xWon = true;
+        bool oWon = true;
+        // std::cout << i << " " << i + 3 << " " << i + 6 << std::endl;
+        xWon &= state.board[i] == ELEMENT::X;
+        xWon &= state.board[i+1] == ELEMENT::X;
+        xWon &= state.board[i+2] == ELEMENT::X;
+        if (xWon)
+        {
+            state.winner = ELEMENT::X;
+            state.gameOver = true;
+            break;
+        }
+        oWon &= state.board[i] == ELEMENT::O;
+        oWon &= state.board[i+1] == ELEMENT::O;
+        oWon &= state.board[i+2] == ELEMENT::O;
+        if (oWon)
+        {
+            state.winner = ELEMENT::O;
+            state.gameOver = true;
+            break;
+        }
+    }
+    for (auto i = 0; i < dWins.size(); i++){
 
+        bool xWon = true;
+        bool oWon = true;
+         std::cout << dWins[i] << " " << dWins[i] + (i*2) + 2 << " " << dWins[i] + (i*4) + 4 << std::endl;
+        xWon &= state.board[dWins[i]] == ELEMENT::X;
+        xWon &= state.board[dWins[i] + (i*2) + 2] == ELEMENT::X;
+        xWon &= state.board[dWins[i] + (i*4) + 4] == ELEMENT::X;
+        if (xWon)
+        {
+            state.winner = ELEMENT::X;
+            state.gameOver = true;
+            break;
+        }
+        oWon &= state.board[dWins[i]] == ELEMENT::O;
+        oWon &= state.board[dWins[i] + (i*2) + 2] == ELEMENT::O;
+        oWon &= state.board[dWins[i] + (i*4) + 4] == ELEMENT::O;
+        if (oWon)
+        {
+            state.winner = ELEMENT::O;
+            state.gameOver = true;
+            break;
+        }
 
+    }
 
-    return false;
 }
 
 void playerPlay( GameState &state){
@@ -132,21 +184,18 @@ void playerPlay( GameState &state){
         }
     }
     std::cout <<  "Player played " << input << std::endl;
-    std::this_thread::sleep_for(2000ms);
+    std::this_thread::sleep_for(1000ms);
 
 }
 void computerPlay(GameState state){
     using namespace std::chrono_literals;
     std::cout <<  "Computer played " << std::endl;
-    std::this_thread::sleep_for(2000ms);
+    std::this_thread::sleep_for(1000ms);
 
 }
 int main() {
 
-
     GameState game = initialzeGame();
-
-    int x = 0;
 
     while(!game.gameOver){
 
@@ -155,12 +204,20 @@ int main() {
             case X_TURN:
                 playerPlay(game);
             case O_TURN:
-                 computerPlay(game);
+                computerPlay(game);
         };
-        gameEnded(game);
-
-
-
+        checkEnd(game);
+    }
+    switch (game.winner) {
+        case X:
+            std::cout << "Winner was X";
+            break;
+        case O:
+            std::cout << "Winner was O";
+            break;
+        case NONE:
+            std::cout << "Game was a draw";
+            break;
     }
 
 }
