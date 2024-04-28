@@ -16,7 +16,8 @@ class OptionGetter{
             currentOption = 0;
         }
         OptionGetter prompt(std::string prompt){
-            std::cout << "prompt" << std::endl;
+            clearScreen();
+            std::cout << prompt << std::endl;
             return *this;
         }
         OptionGetter addOption(std::string optionString,std::function<void()> func){
@@ -41,6 +42,52 @@ class OptionGetter{
 
 };
 
+
+class TaskManager{
+
+    private:
+        class Task{
+            public:
+            std::string taskName;
+            std::string taskDescription;
+            bool taskCompleted;
+            Task(std::string name,std::string description): 
+                taskName(name),
+                taskDescription(description),
+                taskCompleted(false){}
+        };
+        std::vector<Task> taskList;
+    public:
+        TaskManager(){}
+        void displayTask(){
+            if (taskList.size() == 0){
+
+            std::cout << "It is pretty empty (\'>\')" << std::endl;
+            std::cout << "Try adding some tasks " << std::endl;
+            }
+            for (Task i :this->taskList){
+                std::cout << "[ " <<(i.taskCompleted ? "X": " ") <<" ]\t";
+            }
+        }
+        void displayTask(int i){
+            if (i > taskList.size()){
+
+            }
+            for (Task i :this->taskList){
+                std::cout << "[ " <<(i.taskCompleted ? "X": " ") <<" ]\t";
+                std::cout << ". "<< i.taskName << std::endl;
+            }
+        }
+        void updateTask(){std::cout << "You have successully updated tasks\\('3')/" << std::endl;}
+        void addTask(){
+            Task task = Task(input("Task Name: "),input("Task Descrption: "));
+            
+
+        }
+        void removeTask(){std::cout << "You have removed a task" << std::endl;}
+
+};
+
 void clearScreen() {
     std::cout << "\033[2J\033[1;1H";
 }
@@ -58,12 +105,19 @@ int main() {
 
     clearScreen();
     std::cout << "Welcome to ToDo" << std::endl;
-    OptionGetter OG;
-    OG.prompt("Which is the best color")
-        .addOption("Red",[](){std::cout << "Red is a nice colour but no"  << std::endl;})
-        .addOption("Blue",[](){std::cout << "Now we are taling >:) Blue is awesome"  << std::endl;})
-        .addOption("Green",[](){std::cout << "Really ?? Green :|"  << std::endl;})
+    TaskManager taskManger;
+
+    bool running = true;
+    while(running) {
+    OptionGetter()
+        .prompt("To Do Operations")
+        .addOption("Exit",[&](){running = false;})
+        .addOption("View Task",[&](){taskManger.displayTask();})
+        .addOption("Change Task status",[&](){taskManger.updateTask();})
+        .addOption("Add Task",[&](){taskManger.addTask();})
+        .addOption("Remove Task",[&](){taskManger.removeTask();})
         .run();
+    }
 
 
 
