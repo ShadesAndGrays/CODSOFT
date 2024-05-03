@@ -12,6 +12,10 @@ namespace schema{
         std::string isbn;
         int noOfCopies;
     };
+
+    struct Log{
+        d
+    }
     void printBooks(std::vector<schema::Book> books);
 }
 
@@ -29,6 +33,7 @@ class DatabaseManger{
         std::vector<schema::Book> getBooks();
         std::vector<schema::Book> getBooks(std::string column, std::string cmp, bool exact = false);
         void addBook(schema::Book bk);
+        void borrowBook(std::vector<std::string> isbnOfBooks);
         void cleanUp();
 
 

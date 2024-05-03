@@ -81,6 +81,26 @@ std::vector<schema::Book> DatabaseManger::getBooks(std::string column, std::stri
     return books;
 
 }
+
+void DatabaseManger::borrowBook(std::vector<std::string> isbnOfBooks){
+
+    for i 
+    auto x = getConnection()->prepareStatement("INSERT INTO bookInfo VALUES(?,?,?,?)");
+    x->setString(1, bk.title);
+    x->setString(2, bk.author);
+    x->setString(3, bk.isbn);
+    x->setInt(4, bk.noOfCopies);
+
+    try {
+     int rs =  x->executeUpdate();
+    }catch(sql::SQLSyntaxErrorException e){
+        std::cerr << "An error occured: " << e.what() << std::endl;
+    }
+    // create book id 
+    // add books to borrow log
+    // display success message
+
+}
 void schema::printBooks(std::vector<schema::Book> books){
     for (auto book: books){
         std::cout << "\t Title: " << book.title;
