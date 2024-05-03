@@ -1,8 +1,7 @@
 #pragma once
 #include <raylib.h>
-#include <iostream>
 
-
+// Scales the screen item to center of the screen taking up the available space while maitaining aspect ratio
 Rectangle scaleDynamic(Rectangle rect){
     float factor = 
         (float)GetScreenWidth()/SIZE_X <= (float)GetScreenHeight()/SIZE_Y ? 

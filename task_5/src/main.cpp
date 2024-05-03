@@ -1,3 +1,4 @@
+#include <cstring>
 #include <database.hpp>
 #include <raylib.h>
 #define RAYGUI_IMPLEMENTATION 
@@ -9,7 +10,8 @@
 
 
 int main() {
-    // auto db = DatabaseManger::getInstance();
+     auto db = DatabaseManger::getInstance();
+
 
     InitWindow(SIZE_X,SIZE_Y,"BookKeeper");
     SetWindowState(FLAG_WINDOW_RESIZABLE);
@@ -21,6 +23,26 @@ int main() {
 
     int i = 0;
     while(!WindowShouldClose()){
+
+        if (sp.Exit){
+            break;
+        }
+
+        if(sp.SearchButtonPressed){
+                sp.elements.clear();
+                sp.SearchText;
+
+            for ( auto i : db->getBooks()){
+                GuiBookElementState x = {0};
+                strncpy(x.title, i.title.c_str(),128);
+                strncpy(x.author, i.author.c_str(),128);
+                strcpy(x.isbn, i.isbn.c_str());
+                x.copies = i.noOfCopies;
+                sp.elements.push_back(x);
+
+            }
+        }
+
         if (IsKeyPressed(KEY_SPACE)){
             i = (i + 1) % 3;
         }
