@@ -13,7 +13,6 @@
 
 #include "raylib.h"
 #include "util.h"
-#include <charconv>
 #include <string>
 
 // WARNING: raygui implementation is expected to be defined before including this header
@@ -32,7 +31,7 @@ typedef struct {
     
     char title[128];
     char author[128];
-    char isbn[128];
+    char isbn[15];
     int copies;
 
     Vector2 anchor;
@@ -94,6 +93,7 @@ GuiBookElementState InitGuiBookElement(void)
     GuiBookElementState state = { 0 };
 
     state.isBorrowed = false;
+    state.unborrowPressed = false;
 
 
     strcpy(state.author, "");
@@ -113,10 +113,15 @@ void GuiBookElement(GuiBookElementState *state)
     GuiPanel(scaleDynamic((Rectangle){ state->anchor.x + 8,state->anchor.y + -8, 368, 64 }), NULL);
 
     GuiLabel(scaleDynamic((Rectangle){ state->anchor.x + 18,state->anchor.y + -8, 320, 40 }), state->title);
-    GuiCheckBox(scaleDynamic((Rectangle){ state->anchor.x + 306, state->anchor.y + 8, 16, 16 }), "Borrow",&state->isBorrowed );
+    GuiCheckBox(scaleDynamic((Rectangle){ state->anchor.x + 306, state->anchor.y + 8, 16, 16 }), !state->isBorrowed ? "Borrow" : "",&state->isBorrowed );
+    if (state->isBorrowed)
+        state->unborrowPressed = GuiButton(scaleDynamic((Rectangle){ state->anchor.x + 336, state->anchor.y + 8, 16, 16 }), "X" );
     GuiLabel(scaleDynamic((Rectangle){ state->anchor.x + 18, state->anchor.y + 32, 96, 24 }), state->author);
-    GuiLabel(scaleDynamic((Rectangle){ state->anchor.x + 208, state->anchor.y + 32, 120, 24 }), std::to_string(state->copies).c_str());
+    char isbn[30] = "ISBN: ";
+    strcat(isbn, state->isbn);
+    GuiLabel(scaleDynamic((Rectangle){ state->anchor.x + 18, state->anchor.y + 16, 96, 24 }),isbn );
 
+    GuiLabel(scaleDynamic((Rectangle){ state->anchor.x + 208, state->anchor.y + 32, 120, 24 }), std::to_string(state->copies).c_str());
 }
 
 #endif // GUI_BOOKELEMENT_IMPLEMENTATION

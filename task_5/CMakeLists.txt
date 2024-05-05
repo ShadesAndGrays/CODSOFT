@@ -7,6 +7,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS on)
 set(src
 src/main.cpp
 src/database.cpp
+src/util.cpp
 )
 
 add_compile_definitions(

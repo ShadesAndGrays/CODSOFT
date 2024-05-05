@@ -1,12 +1,48 @@
 #include <cstring>
+#include <ctime>
 #include <database.hpp>
+#include <iomanip>
+#include <iostream>
+#include <memory>
 #include <raylib.h>
+#include <sstream>
 #define RAYGUI_IMPLEMENTATION 
 #include <raygui.h>
 #include <SearchPage.h>
 #include <util.h>
 
 
+
+
+void displayBooks(GuiSearchPageState &sp, std::shared_ptr<DatabaseManger> db){
+                sp.elements.clear();
+                std::string filter;
+                switch (sp.searchFilter) {
+                    case TITLE:
+                        filter = "title";
+                        // std::cout << "Search By title" << std::endl;
+                        break;
+                    case ISBN:
+                        filter = "isbn";
+                        // std::cout << "Search By ISBN" << std::endl;
+                        break;
+                    case AUTHOR:
+                        filter = "author";
+                        // std::cout << "Search By Author" << std::endl;
+                        break;
+                }
+            std::vector <schema::Book> Books =  std::string(sp.SearchText) == "" ? db->getBooks() : db->getBooks(filter,"%" + std::string(sp.SearchText) + "%",false) ;
+
+
+            for ( auto &i : Books){
+                GuiBookElementState x = {0};
+                strncpy(x.title, i.title.c_str(),128);
+                strncpy(x.author, i.author.c_str(),128);
+                strcpy(x.isbn, i.isbn.c_str());
+                x.copies = i.noOfCopies;
+                sp.elements.push_back(x);
+}
+}
 
 
 int main() {
@@ -22,6 +58,8 @@ int main() {
 
 
     int i = 0;
+
+    displayBooks(sp,db);
     while(!WindowShouldClose()){
 
         if (sp.Exit){
@@ -29,18 +67,15 @@ int main() {
         }
 
         if(sp.SearchButtonPressed){
-                sp.elements.clear();
-                sp.SearchText;
+            displayBooks(sp,db);
+        }
+        if (sp.checkOutBtn){
+            auto books = std::vector<std::string> (sp.checkingOut.begin(),sp.checkingOut.end());
+            db->borrowBook(books);
+            sp.checkingOut.clear();
 
-            for ( auto i : db->getBooks()){
-                GuiBookElementState x = {0};
-                strncpy(x.title, i.title.c_str(),128);
-                strncpy(x.author, i.author.c_str(),128);
-                strcpy(x.isbn, i.isbn.c_str());
-                x.copies = i.noOfCopies;
-                sp.elements.push_back(x);
-
-            }
+            sp.checkOutBtn = false;
+            schema::printlogs(db->getBorrowLog());
         }
 
         if (IsKeyPressed(KEY_SPACE)){
@@ -53,16 +88,15 @@ int main() {
 
         ClearBackground(RAYWHITE);
 
-        if(i == 1){
+        if(i == 0){
             GuiSearchPage(&sp);
-        } else if(i == 2){
+        } else if(i == 1){
         }
 
 
         EndDrawing();
 
     }
-
 
 }
 

@@ -1,7 +1,10 @@
 #pragma once
 
+#include <ctime>
 #include <mariadb/conncpp.hpp>
 #include <mariadb/conncpp/Connection.hpp>
+#include <mariadb/conncpp/Exception.hpp>
+#include <mariadb/conncpp/jdbccompat.hpp>
 #include <memory>
 #include <vector>
 
@@ -14,9 +17,13 @@ namespace schema{
     };
 
     struct Log{
-        d
-    }
+        int borrowId;
+        time_t borrowDate;
+        bool hasReturned;
+        std::string isbn;
+    };
     void printBooks(std::vector<schema::Book> books);
+    void printlogs(std::vector<schema::Log> logs);
 }
 
 class DatabaseManger{
@@ -33,7 +40,9 @@ class DatabaseManger{
         std::vector<schema::Book> getBooks();
         std::vector<schema::Book> getBooks(std::string column, std::string cmp, bool exact = false);
         void addBook(schema::Book bk);
-        void borrowBook(std::vector<std::string> isbnOfBooks);
+        void borrowBook(std::vector<std::string> &isbnOfBooks);
+        std::vector<schema::Log> getBorrowLog(int borrowId);
+        std::vector<schema::Log> getBorrowLog();
         void cleanUp();
 
 

@@ -1,3 +1,4 @@
+#include "util.h"
 #include <cstdlib>
 #include <database.hpp>
 #include <iostream>
@@ -5,8 +6,10 @@
 #include <mariadb/conncpp/Driver.hpp>
 #include <mariadb/conncpp/DriverManager.hpp>
 #include <mariadb/conncpp/Exception.hpp>
+#include <mariadb/conncpp/ResultSet.hpp>
 #include <memory>
 #include <vector>
+#include <ctime>
 
 
 std::shared_ptr<DatabaseManger> DatabaseManger::dbManager = nullptr;
@@ -82,24 +85,70 @@ std::vector<schema::Book> DatabaseManger::getBooks(std::string column, std::stri
 
 }
 
-void DatabaseManger::borrowBook(std::vector<std::string> isbnOfBooks){
+void DatabaseManger::borrowBook(std::vector<std::string> &isbnOfBooks){
 
-    for i 
-    auto x = getConnection()->prepareStatement("INSERT INTO bookInfo VALUES(?,?,?,?)");
-    x->setString(1, bk.title);
-    x->setString(2, bk.author);
-    x->setString(3, bk.isbn);
-    x->setInt(4, bk.noOfCopies);
 
-    try {
-     int rs =  x->executeUpdate();
-    }catch(sql::SQLSyntaxErrorException e){
-        std::cerr << "An error occured: " << e.what() << std::endl;
+    for (auto &i : isbnOfBooks){
+        auto x = getConnection()->prepareStatement("INSERT INTO borrowLog VALUES(?,?,?,?)");
+
+        x->setInt(1, 0);
+        x->setString(2, [](){ time_t now = time(0); return timeToDB(now);}());
+        x->setBoolean(3, false);
+        x->setString(4, i);
+        try {
+            int rs =  x->executeUpdate();
+        }catch(sql::SQLSyntaxErrorException e){
+            std::cerr << "An error occured: " << e.what() << std::endl;
+            std::cout << x << std::endl;
+        }
     }
+
     // create book id 
     // add books to borrow log
     // display success message
 
+}
+std::vector<schema::Log> DatabaseManger::getBorrowLog(int borrowId){
+    std::vector<schema::Log> logs;
+    auto x = getConnection()->prepareStatement("SELECT borrowId, UNIX_TIMESTAMP(borrowDate), hasReturned, isbn from borrowLog where borrowId = ?");
+    x->setInt(1, borrowId);
+
+    try {
+        sql::ResultSet * rs =  x->executeQuery();
+        while(rs->next()){
+            schema::Log log;
+            log.borrowId = rs->getInt("borrowId");
+            log.borrowDate = (time_t)rs->getInt("UNIX_TIMESTAMP(borrowDate)");
+            log.hasReturned = rs->getBoolean("hasReturned");
+            log.isbn = rs->getString("isbn");
+            logs.push_back(log);
+        }
+
+    }catch(sql::SQLSyntaxErrorException e){
+        std::cerr << "An error occured: " << e.what() << std::endl;
+    }
+    return logs;
+}
+
+std::vector<schema::Log> DatabaseManger::getBorrowLog(){
+    std::vector<schema::Log> logs;
+    auto x = getConnection()->prepareStatement("SELECT borrowId,UNIX_TIMESTAMP(borrowDate), hasReturned,isbn from borrowLog");
+
+    try {
+        sql::ResultSet * rs =  x->executeQuery();
+        while(rs->next()){
+            schema::Log log;
+            log.borrowId = rs->getInt("borrowId");
+            log.borrowDate = (time_t)rs->getInt("UNIX_TIMESTAMP(borrowDate)");
+            log.hasReturned = rs->getBoolean("hasReturned");
+            log.isbn = rs->getString("isbn");
+            logs.push_back(log);
+        }
+
+    }catch(sql::SQLSyntaxErrorException e){
+        std::cerr << "An error occured: " << e.what() << std::endl;
+    }
+    return logs;
 }
 void schema::printBooks(std::vector<schema::Book> books){
     for (auto book: books){
@@ -107,6 +156,15 @@ void schema::printBooks(std::vector<schema::Book> books){
         std::cout << "\t\t Author: " << book.author;
         std::cout << "\t ISBN: " << book.isbn;
         std::cout << "\t No. of Copies: " << book.noOfCopies<<std::endl;
+    }
+    std::cout << std::endl;
+}
+void schema::printlogs(std::vector<schema::Log> logs){
+    for (auto log: logs){
+        std::cout << "\t BorrowId: " << log.borrowId;
+        std::cout << "\t ISBN: " << log.isbn;
+        std::cout << "\t Has Returned: " << (log.hasReturned ? "TRUE": "FALSE") ;
+        std::cout << "\t Date: " << ctime(&log.borrowDate);
     }
     std::cout << std::endl;
 }
