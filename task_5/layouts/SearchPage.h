@@ -126,7 +126,7 @@ GuiSearchPageState InitGuiSearchPage(void)
 void GuiSearchPage(GuiSearchPageState *state)
 {
     for (auto i = 0; i < state->elements.size(); i++){
-        state->elements[i].anchor = Vector2Add(state->ScrollPanel005ScrollOffset, {72.0f + 536.0/2.0 - 368.0f/2 , 140.0f+ (64 +20 )* i}); 
+        state->elements[i].anchor = Vector2Add(state->ScrollPanel005ScrollOffset, {10.0f + 536.0/2.0 - 368.0f/2 , 140.0f+ (64 +20 )* i}); 
 
     }
     GuiPanel(scaleDynamic((Rectangle){ 0, 0, 696, 472 }), NULL);

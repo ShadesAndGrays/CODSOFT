@@ -110,13 +110,15 @@ GuiBookElementState InitGuiBookElement(void)
 
 void GuiBookElement(GuiBookElementState *state)
 {
-    GuiPanel(scaleDynamic((Rectangle){ state->anchor.x + 8,state->anchor.y + -8, 368, 64 }), NULL);
+    GuiPanel(scaleDynamic((Rectangle){ state->anchor.x + 8,state->anchor.y + -8, 428, 64 }), NULL);
 
     GuiLabel(scaleDynamic((Rectangle){ state->anchor.x + 18,state->anchor.y + -8, 320, 40 }), state->title);
-    GuiCheckBox(scaleDynamic((Rectangle){ state->anchor.x + 306, state->anchor.y + 8, 16, 16 }), !state->isBorrowed ? "Borrow" : "",&state->isBorrowed );
+    GuiCheckBox(scaleDynamic((Rectangle){ state->anchor.x + 346, state->anchor.y + 8, 16, 16 }), !state->isBorrowed ? "Borrow" : "",&state->isBorrowed );
     if (state->isBorrowed)
         state->unborrowPressed = GuiButton(scaleDynamic((Rectangle){ state->anchor.x + 336, state->anchor.y + 8, 16, 16 }), "X" );
-    GuiLabel(scaleDynamic((Rectangle){ state->anchor.x + 18, state->anchor.y + 32, 96, 24 }), state->author);
+    char author[30] = "By ";
+    strcat(author, state->author);
+    GuiLabel(scaleDynamic((Rectangle){ state->anchor.x + 18, state->anchor.y + 32, 96, 24 }), author);
     char isbn[30] = "ISBN: ";
     strcat(isbn, state->isbn);
     GuiLabel(scaleDynamic((Rectangle){ state->anchor.x + 18, state->anchor.y + 16, 96, 24 }),isbn );
