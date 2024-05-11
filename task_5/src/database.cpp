@@ -1,4 +1,5 @@
 #include "util.h"
+#include <algorithm>
 #include <cstdlib>
 #include <database.hpp>
 #include <iostream>
@@ -51,6 +52,31 @@ std::vector<schema::Book> DatabaseManger::getBooks(){
     }
     return books;
 }
+std::vector<schema::Book> DatabaseManger::getBooks(std::vector<std::string> isbnOfBooks){
+
+    std::string ps = "SELECT * FROM bookInfo where ";
+    for (auto i = 0; i< isbnOfBooks.size(); i++){
+        if (i != 0)
+            ps += " OR";
+        ps += " isbn = ?";
+    }
+    auto x = getConnection()->prepareStatement(ps);
+
+    for (auto i = 0; i< isbnOfBooks.size(); i++){
+        x->setString(i+1, isbnOfBooks[i]);
+    }
+    std::unique_ptr<sql::ResultSet> rs ( x->executeQuery());
+    std::vector<schema::Book> books;
+    while(rs->next()){
+        schema::Book book;
+        book.author = rs->getString("author");
+        book.title = rs->getString("title");
+        book.isbn = rs->getString("isbn");
+        book.noOfCopies = rs->getInt("noOfCopies");
+        books.push_back(book);
+    }
+    return books;
+}
 void DatabaseManger::addBook(schema::Book bk){
     auto x = getConnection()->prepareStatement("INSERT INTO bookInfo VALUES(?,?,?,?)");
     x->setString(1, bk.title);
@@ -59,13 +85,36 @@ void DatabaseManger::addBook(schema::Book bk){
     x->setInt(4, bk.noOfCopies);
 
     try {
-     int rs =  x->executeUpdate();
+        int rs =  x->executeUpdate();
     }catch(sql::SQLSyntaxErrorException e){
         std::cerr << "An error occured: " << e.what() << std::endl;
     }
 }
 
 
+void DatabaseManger::addBook(std::vector<std::string> isbnOfBooks,int number){
+
+    std::string ps = "UPDATE bookInfo set noOfCopies=noOfCopies+? where";
+    for (auto i = 0; i< isbnOfBooks.size(); i++){
+        if (i != 0)
+            ps += " OR";
+        ps += " isbn = ?";
+    }
+    std::cout << ps << std::endl;
+    auto x = getConnection()->prepareStatement(ps);
+    x->setInt(1, number);
+
+    for (auto i = 0; i< isbnOfBooks.size(); i++){
+        x->setString(i+2, isbnOfBooks[i]);
+    }
+
+    try {
+        int rs =  x->executeUpdate();
+    }catch(sql::SQLSyntaxErrorException e){
+        std::cerr << "An error occured: " << e.what() << std::endl;
+        std::cout << x << std::endl;
+    }
+}
 std::vector<schema::Book> DatabaseManger::getBooks(std::string column, std::string cmp, bool exact){
     std::string query = "SELECT * FROM bookInfo where " + column + (exact ? " = " : " LIKE ") + "?";
     std::cout << query << std::endl;
@@ -85,13 +134,43 @@ std::vector<schema::Book> DatabaseManger::getBooks(std::string column, std::stri
 
 }
 
+int DatabaseManger::nextBorrowID(){
+    auto x = getConnection()->prepareStatement("SELECT borrowId FROM borrowLog ORDER BY borrowID DESC LIMIT 3");
+    try {
+        std::unique_ptr<sql::ResultSet> rs ( x->executeQuery());
+        if (rs->next())
+            return rs->getInt("borrowId")+1;
+        else 
+            return 0;
+    }catch(sql::SQLSyntaxErrorException e){
+        std::cerr << "An error occured: " << e.what() << std::endl;
+        std::cout << x << std::endl;
+        return -1;
+    }
+} 
+
 void DatabaseManger::borrowBook(std::vector<std::string> &isbnOfBooks){
+
+    int borrow_id;
+    while( (borrow_id = nextBorrowID()) == -1){}
+    for (auto &i: isbnOfBooks){
+
+        auto x = getConnection()->prepareStatement("UPDATE bookInfo set noOfCopies=noOfCopies-1 where isbn=?");
+        x->setString(1, i);
+
+        try {
+            int rs =  x->executeUpdate();
+        }catch(sql::SQLSyntaxErrorException e){
+            std::cerr << "An error occured: " << e.what() << std::endl;
+            std::cout << x << std::endl;
+        }
+    }
 
 
     for (auto &i : isbnOfBooks){
         auto x = getConnection()->prepareStatement("INSERT INTO borrowLog VALUES(?,?,?,?)");
 
-        x->setInt(1, 0);
+        x->setInt(1, borrow_id);
         x->setString(2, [](){ time_t now = time(0); return timeToDB(now);}());
         x->setBoolean(3, false);
         x->setString(4, i);
@@ -108,6 +187,33 @@ void DatabaseManger::borrowBook(std::vector<std::string> &isbnOfBooks){
     // display success message
 
 }
+
+void DatabaseManger::returnBook(int borrowBookID){
+
+    std::vector<schema::Log> logs  = getBorrowLog(borrowBookID);;
+
+    auto x = getConnection()->prepareStatement("UPDATE borrowLog set hasReturned=? where borrowID = ?");
+    x->setBoolean(1, true);
+    x->setInt(2, borrowBookID);
+
+    try {
+        int rs =  x->executeUpdate();
+    }catch(sql::SQLSyntaxErrorException e){
+        std::cerr << "An error occured: " << e.what() << std::endl;
+    }
+
+   if(logs[0].hasReturned)
+       return;
+
+    std::vector<std::string> isbns(logs.size());
+    std::transform(logs.begin(),logs.end(),isbns.begin(),[](schema::Log x){ return x.isbn;});
+    /* for (auto i: isbns){
+        std::cout << i << " " ;
+    } */
+    std::cout << std::endl;
+    addBook(isbns,1);
+}
+
 std::vector<schema::Log> DatabaseManger::getBorrowLog(int borrowId){
     std::vector<schema::Log> logs;
     auto x = getConnection()->prepareStatement("SELECT borrowId, UNIX_TIMESTAMP(borrowDate), hasReturned, isbn from borrowLog where borrowId = ?");
@@ -168,3 +274,4 @@ void schema::printlogs(std::vector<schema::Log> logs){
     }
     std::cout << std::endl;
 }
+

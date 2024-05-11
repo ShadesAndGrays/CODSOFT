@@ -105,6 +105,7 @@ GuiBookElementState InitGuiBookElement(void)
         state.anchor = {0};
     // Custom variables initialization
 
+        
     return state;
 }
 
@@ -113,9 +114,13 @@ void GuiBookElement(GuiBookElementState *state)
     GuiPanel(scaleDynamic((Rectangle){ state->anchor.x + 8,state->anchor.y + -8, 428, 64 }), NULL);
 
     GuiLabel(scaleDynamic((Rectangle){ state->anchor.x + 18,state->anchor.y + -8, 320, 40 }), state->title);
+    if (state->copies >0)
     GuiCheckBox(scaleDynamic((Rectangle){ state->anchor.x + 346, state->anchor.y + 8, 16, 16 }), !state->isBorrowed ? "Borrow" : "",&state->isBorrowed );
+    else 
+    GuiLabel(scaleDynamic((Rectangle){ state->anchor.x + 326, state->anchor.y + 8, 160, 16 }),"Out of Stock" );
+
     if (state->isBorrowed)
-        state->unborrowPressed = GuiButton(scaleDynamic((Rectangle){ state->anchor.x + 336, state->anchor.y + 8, 16, 16 }), "X" );
+        state->unborrowPressed = GuiButton(scaleDynamic((Rectangle){ state->anchor.x + 326, state->anchor.y + 8, 16, 16 }), "X" );
     char author[30] = "By ";
     strcat(author, state->author);
     GuiLabel(scaleDynamic((Rectangle){ state->anchor.x + 18, state->anchor.y + 32, 96, 24 }), author);

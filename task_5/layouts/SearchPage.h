@@ -14,7 +14,6 @@
 
 #include "raylib.h"
 #include "raymath.h"
-#include <cctype>
 #include <vector>
 #include <set>
 

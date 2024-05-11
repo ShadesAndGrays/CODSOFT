@@ -26,3 +26,13 @@ std::string timeToDB(time_t t){
     return  os.str();
 
 }
+std::string timeToHuman(time_t t){
+    char fmt[] ="%a %b %d %T %Y"; 
+    std::tm  timeM{};
+    std::stringstream is(ctime(&t));
+    is >> std::get_time(&timeM, fmt);
+    std::stringstream os;
+    os << std::put_time(&timeM, "%a %b %d %Y");
+    return  os.str();
+
+}
